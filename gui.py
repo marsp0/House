@@ -1,204 +1,151 @@
 import Tkinter as tk
-from house import Properties,House,Apartment
-import excep as ex
-import tkMessageBox as mb
-import tkFileDialog as fd
+from house import Properties,Apartment,House
 
 
 class Gui(tk.Frame):
 
 	def __init__(self,parent=None,*args,**kwargs):
-
 		tk.Frame.__init__(self,parent,*args,**kwargs)
-
-		self.master.maxsize(width=600,height=400)
-		self.master.minsize(width=600,height=400)
-		self.master.title('MyHouse')
 		self.pack()
+		self.master.minsize(width=600,height=400)
+		self.master.maxsize(width=600,height=400)
 
+		self.add_view = AddView(self)
 		self.properties = Properties()
 
-		''' MAIN VIEW'''
-		self.main_display = tk.Frame(self)
+class AddView(tk.Frame):
 
-		'''ADD VIEW'''
-		self.add_property_display = tk.Frame(self)
-		self.add_vars = {'for_sale':tk.BooleanVar(),
-						'owner' : tk.StringVar(),
-						'owner_phone':tk.StringVar(),
-						'price':tk.IntVar(),
-						'address':tk.StringVar(),
-						'square_meters':tk.IntVar(),
-						'garage':tk.BooleanVar(),
-						'attic':tk.BooleanVar(),
-						'basement':tk.BooleanVar(),
-						'yard':tk.BooleanVar(),
-						'furniture':tk.BooleanVar(),
-						'parno':tk.BooleanVar(),
-						'tec':tk.BooleanVar(),
-						'rooms':tk.IntVar(),
-						'floors':tk.IntVar(),
-						'floor':tk.IntVar(),
-						'max_floors':tk.IntVar(),
-						'house':tk.BooleanVar(),
-						'description':tk.StringVar()}
+	def __init__(self,parent=None,*args,**kwargs):
+		tk.Frame.__init__(self,parent,*args,**kwargs)
 
-		self.first_column_frame = tk.Frame(self.add_property_display,bd=2,relief='raised')
-		self.house_frame = tk.Frame(self.first_column_frame,bd=2,relief='raised')
-		self.for_sale_frame = tk.Frame(self.first_column_frame,bd=2,relief='raised')
-		self.parno_frame = tk.Frame(self.first_column_frame,bd=2,relief='raised')
-		self.owner_frame = tk.Frame(self.first_column_frame,bd=2,relief='raised')
+		self.vars = {'owner':tk.StringVar(),
+					'house':tk.BooleanVar(),
+					'for_sale':tk.BooleanVar(),
+					'owner_phone': tk.StringVar(),
+					'address':tk.StringVar(),
+					'basement':tk.BooleanVar(),
+					'attic':tk.BooleanVar(),
+					'yard':tk.BooleanVar(),
+					'garage':tk.BooleanVar(),
+					'price':tk.IntVar(),
+					'square_meters':tk.IntVar(),
+					'furniture':tk.BooleanVar(),
+					'parno':tk.BooleanVar(),
+					'tec':tk.BooleanVar(),
+					'rooms':tk.IntVar(),
+					'floors':tk.IntVar(),
+					'floor':tk.IntVar(),
+					'max_floors':tk.IntVar(),
+					'description':tk.StringVar()}
 
-		self.second_column_frame = tk.Frame(self.add_property_display,bd=2,relief='raised')
-		self.garage_frame = tk.Frame(self.second_column_frame,bd=2,relief='raised')
-		self.attic_frame = tk.Frame(self.second_column_frame,bd=2,relief='raised')
-		self.owner_phone_frame = tk.Frame(self.second_column_frame,bd=2,relief='raised')
-		self.furniture_frame = tk.Frame(self.second_column_frame,bd=2,relief='raised')
+		self.additional_frame = tk.Frame(self)
 
-		self.third_column_frame = tk.Frame(self.add_property_display,bd=2,relief='raised')
-		self.basement_frame = tk.Frame(self.third_column_frame,bd=2,relief='raised')
-		self.yard_frame = tk.Frame(self.third_column_frame,bd=2,relief='raised')
-		self.tec_frame = tk.Frame(self.third_column_frame,bd=2,relief='raised')
-		self.price_frame = tk.Frame(self.third_column_frame,bd=2,relief='raised')
+		self.main_options = (('House','For sale'),('Owner','Owner phone'),('Address','Square meters'),('Price','Garage'),('Description',None),
+							('Yard','Attic'),('Basement','Furniture'),('Parno','TEC'))
+		self.flat_options = ('Rooms','Max floors','Floor')
 
-		self.address_frame = tk.Frame(self.add_property_display,bd=3,relief='raised')
-		self.square_meters_frame = tk.Frame(self.add_property_display,bd=3,relief='raised')
+	def ask_view(self):
+		self.pack()
+		row = 1
+		tk.Label(self,text='Add Property',bd=3,relief='raised',width=84,pady=6).grid(row=0,column=1,columnspan=4)
+		for var1, var2 in self.main_options:
+			if None not in (var1,var2):
+				var1_var = var1.lower().replace(' ','_')
+				var2_var = var2.lower().replace(' ','_')
+				tk.Label(self,text=var1,relief='raised',bd=2,width=20,pady=3).grid(row=row,column=1)
+				tk.Label(self,text=var2,relief='raised',bd=2,width=20,pady=3).grid(row=row,column=3)
+				if isinstance(self.vars[var1_var],tk.BooleanVar):
+					if var1 == 'House':
+						tk.Checkbutton(self,variable = self.vars[var1_var],command=self.add_additional_frame,bd=2,relief='raised').grid(row=row,column=2)
+					else:
+						tk.Checkbutton(self,variable = self.vars[var1_var],bd=2,relief='raised').grid(row=row,column=2)
+				elif isinstance(self.vars[var1_var],tk.IntVar) or isinstance(self.vars[var1_var],tk.StringVar):
+					tk.Entry(self,textvariable=self.vars[var1_var]).grid(row=row,column=2)
+				if isinstance(self.vars[var2_var],tk.BooleanVar):
+					tk.Checkbutton(self,variable=self.vars[var2_var]).grid(row=row,column=4)
+				elif isinstance(self.vars[var2_var],tk.IntVar) or isinstance(self.vars[var2_var],tk.StringVar):
+					tk.Entry(self,textvariable=self.vars[var2_var]).grid(row=row,column=4)
+			else:
+				tk.Label(self,text=var1,width=20,relief='raised',bd=2,pady=3).grid(row=row,column=1)
+				tk.Entry(self,textvariable=self.vars['description'],width=63).grid(row=row,column=2,columnspan=3)
+			row+=1
 
-		self.additional_info_frame = tk.Frame(self.add_property_display,bd=2,relief='raised')
-		self.floors_frame = tk.Frame(self.additional_info_frame,bd=2,relief='raised')
-		self.rooms_frame = tk.Frame(self.additional_info_frame,bd=2,relief='raised')
-		self.max_floors_frame = tk.Frame(self.additional_info_frame,bd=2,relief='raised')
-		self.floor_frame = tk.Frame(self.additional_info_frame,bd=2,relief='raised')
-
-
-		self.main_view()
-
-	def packer(self,to_unpack,to_pack,*args):
-		for child in to_unpack.winfo_children():
+	def add_additional_frame(self):
+		self.additional_frame.grid(row=9,column=1,columnspan=4)
+		for child in self.additional_frame.winfo_children():
 			child.destroy()
-		to_unpack.pack_forget()
-		to_pack(*args)
+		row = 1
+		width=17
+		if self.vars['house'].get() == 0:
+			tk.Label(self.additional_frame,text='Floors',width=20,relief='raised',bd=2,pady=3).grid(row=row,column=1)
+			tk.Entry(self.additional_frame,textvariable=self.vars['floors']).grid(row=row,column=2)
+			width=19
+		else:
+			column=1
+			for var in self.flat_options:
+				if self.flat_options.index(var) % 2 == 0:
+					row += 1
+					column = 1
+				tk.Label(self.additional_frame,text=var,width=20,bd=2,relief='raised',pady=3).grid(row=row,column=column)
+				tk.Entry(self.additional_frame,textvariable=self.vars[var.lower().replace(' ','_')]).grid(row=row,column=column + 1)
+				column += 2
+		tk.Button(self.additional_frame,text='Back',width=16).grid(row=row,column=3)
+		tk.Button(self.additional_frame,text='Save',width=width).grid(row=row,column=4)
 
-	def grider(self,to_ungrid,to_grid,*args):
-		for child in to_ungrid.winfo_children():
-			if isinstance(child,tk.Frame):
-				child.grid_forget()
+	def show_view(self,info_dict):
+		self.pack()
+		row=1
+		tk.Label(self,text='View Property',width=84,pady=6,bd=2,relief='raised').grid(row=0,column=1,columnspan=4)
+		for var1,var2 in self.main_options:
+			if None not in (var1,var2):
+				info_key1 = var1.lower().replace(' ','_')
+				info_key2 = var2.lower().replace(' ','_')
+				tk.Label(self,text=var1,width=20,bd=2,relief='raised',pady=3).grid(row=row,column=1)
+				tk.Label(self,text=self.get_value(info_dict[info_key1]),width=21,bd=2,relief='raised',pady=3).grid(row=row,column=2)
+
+				tk.Label(self,text=var2,width=20,bd=2,relief='raised',pady=3).grid(row=row,column=3)
+				tk.Label(self,text=self.get_value(info_dict[info_key2]),width=21,bd=2,relief='raised',pady=3).grid(row=row,column=4)
+			else:
+
+				tk.Label(self,text='Description',width=20,bd=2,relief='raised',pady=3).grid(row=row,column=1)
+				tk.Label(self,text=info_dict['description'],width=64,bd=2,relief='raised',pady=3).grid(row=row,column=2,columnspan=3)
+			row += 1
+		if info_dict['house']:
+			tk.Label(self,text='Floors',width=20,bd=2,relief='raised',pady=3).grid(row=row,column=1)
+			tk.Label(self,text=self.get_value(info_dict['floors']),width=21,bd=2,relief='raised',pady=3).grid(row=row,column=2)
+		else:
+			column=1
+			for var in self.flat_options:
+				if self.flat_options.index(var) % 2 == 0:
+					row += 1
+					column = 1
+				tk.Label(self.additional_frame,text=var,width=20,bd=2,relief='raised',pady=3).grid(row=row,column=column)
+				tk.Label(self.additional_frame,textvariable=self.get_value(var.lower().replace(' ','_'))).grid(row=row,column=column + 1)
+				column += 2
+		tk.Button(self,text='Back',width=16).grid(row=row,column=3)
+		tk.Button(self,text='Sell/Rent',width=16).grid(row=row,column=4)
+
+
+	def get_value(self,some_str):
+		if some_str == 1:
+			return 'Yes'
+		elif some_str == 0:
+			return 'No'
+		else:
+			return some_str
+
+
+	def hide(self):
+		self.pack_forget()
+		for child in self.winfo_children():
+			if isinstance(child, tk.Frame):
+				try:
+					child.pack_forget()
+				except:
+					child.grid_forget()
 			else:
 				child.destroy()
-		to_ungrid.grid_forget()
-		to_grid(*args)
-
-
-	def main_view(self):
-		self.main_display.pack()
-		tk.Button(self.main_display,text='Add Property',command=lambda : self.packer(self.main_display,self.add_property_view)).grid(row=0,column=0)
-		tk.Button(self.main_display,text='Quit',command=self.quit).grid(row=0,column=1)
-
-	def add_property_view(self):
-
-		self.add_property_display.pack()
-
-		self.first_column_frame.grid(row=1,column=1)
-		self.house_frame.grid(row=1,column=1)
-		self.for_sale_frame.grid(row=2,column=1)
-		self.parno_frame.grid(row=3,column=1)
-		self.owner_frame.grid(row=4,column=1)
-
-		self.second_column_frame.grid(row=1,column=2)
-		self.garage_frame.grid(row=1,column=1)
-		self.attic_frame.grid(row=2,column=1)
-		self.furniture_frame.grid(row=3,column=1)
-		self.owner_phone_frame.grid(row=4,column=1)
-
-		self.third_column_frame.grid(row=1,column=3)
-		self.basement_frame.grid(row=1,column=1)
-		self.yard_frame.grid(row=2,column=1)
-		self.tec_frame.grid(row=3,column=1)
-		self.price_frame.grid(row=4,column=1)
-
-		self.address_frame.grid(row=2,column=1,columnspan=2)
-		self.square_meters_frame.grid(row=2,column=3)
-		
-		#17 / 41
-		tk.Label(self.add_property_display,text='Add Property',width=84,bd=5,relief='raised').grid(row=0,column=1,columnspan=6)
-		
-
-		tk.Label(self.house_frame,text = 'Type',width=9).grid(row=1,column=1)
-		tk.Radiobutton(self.house_frame,text='House',width=8,variable = self.add_vars['house'],value=True,command=lambda : self.grider(self.additional_info_frame,self.add_aditional_info,'house')).grid(row=1,column=2)
-		tk.Radiobutton(self.house_frame,text='Flat',width=8,variable = self.add_vars['house'],value=False,command=lambda : self.grider(self.additional_info_frame,self.add_aditional_info,'apartment')).grid(row=1,column=3)
-
-		tk.Label(self.for_sale_frame,text='For sale',width=21).grid(row=1,column=1)
-		tk.Checkbutton(self.for_sale_frame,text=' ',variable=self.add_vars['for_sale'],width=5).grid(row=1,column=2)
-
-		tk.Label(self.garage_frame,text='Garage',width=21).grid(row=1,column=1)
-		tk.Checkbutton(self.garage_frame,text='',variable=self.add_vars['garage'],width=5).grid(row=1,column=2)
-
-		tk.Label(self.basement_frame,text='Basement',width=21).grid(row=1,column=1)
-		tk.Checkbutton(self.basement_frame,text='',variable=self.add_vars['basement'],width=4).grid(row=1,column=2)
- 
-		tk.Label(self.attic_frame,text='Attic',width=21).grid(row=1,column=1)
-		tk.Checkbutton(self.attic_frame,text='',variable=self.add_vars['attic'],width=5).grid(row=1,column=2)
-
-		tk.Label(self.yard_frame,text='Yard',width=21).grid(row=1,column=1)
-		tk.Checkbutton(self.yard_frame,text='',variable=self.add_vars['yard'],width=4).grid(row=1,column=2)
-
-		tk.Label(self.parno_frame,text='Parno',width=21).grid(row=1,column=1)
-		tk.Checkbutton(self.parno_frame,text=' ',variable=self.add_vars['parno'],width=5).grid(row=1,column=2)
-
-		tk.Label(self.furniture_frame,text='Furniture',width=21).grid(row=1,column=1)
-		tk.Checkbutton(self.furniture_frame,text='',variable=self.add_vars['furniture'],width=5).grid(row=1,column=2)
-
-		tk.Label(self.tec_frame,text='TEC',width=21).grid(row=1,column=1)
-		tk.Checkbutton(self.tec_frame,text='',variable=self.add_vars['tec'],width=4).grid(row=1,column=2)
-
-		tk.Label(self.owner_frame,text='Owner',width=6).grid(row=1,column=1)
-		tk.Entry(self.owner_frame,textvariable=self.add_vars['owner'],width=19).grid(row=1,column=2)
-
-		tk.Label(self.owner_phone_frame,text='Phone',width=6).grid(row=1,column=1)
-		tk.Entry(self.owner_phone_frame,textvariable=self.add_vars['owner_phone'],width=19).grid(row=1,column=2)
-
-		tk.Label(self.price_frame,text='Price',width=6).grid(row=1,column=1)
-		tk.Entry(self.price_frame,textvariable=self.add_vars['price'],width=18).grid(row=1,column=2)
-
-		tk.Label(self.address_frame,text='Address',width=7).grid(row=1,column=1)
-		tk.Entry(self.address_frame,textvariable=self.add_vars['address'],width=47).grid(row=1,column=2)
-
-		tk.Label(self.square_meters_frame,text='Square Meters').grid(row=1,column=1)
-		tk.Entry(self.square_meters_frame,textvariable=self.add_vars['square_meters'],width=12).grid(row=1,column=2)
-
-
-		
-
-	def add_aditional_info(self,option):
-		self.additional_info_frame.grid(row=3,column=1,columnspan=3)
-		if option == 'house':
-			self.floors_frame.grid(row=1,column=3)
-			tk.Label(self.floors_frame,text='Floors',width=10).grid(row=1,column=1)
-			tk.Entry(self.floors_frame,textvariable=self.add_vars['floors'],width=14).grid(row=1,column=2)
-
-			tk.Label(self.additional_info_frame,text='Description',width=57,bd=2,relief='raised',pady=6).grid(row=1,column=1,columnspan=2)
-			tk.Entry(self.additional_info_frame,textvariable=self.add_vars['description'],width=83).grid(row=2,column=1,columnspan=3)
-		elif option == 'apartment':
-			self.rooms_frame.grid(row=1,column=1)
-			self.max_floors_frame.grid(row=1,column=2)
-			self.floor_frame.grid(row=1,column=3)
-			tk.Label(self.rooms_frame,text='Rooms',width=10).grid(row=1,column=1)
-			tk.Entry(self.rooms_frame,textvariable=self.add_vars['rooms'],width=15).grid(row=1,column=2)
-
-			tk.Label(self.max_floors_frame,text='Max Floors',width=10).grid(row=1,column=1)
-			tk.Entry(self.max_floors_frame,textvariable=self.add_vars['max_floors'],width=16).grid(row=1,column=2)
-
-			tk.Label(self.floor_frame,text='Floor',width=9).grid(row=1,column=1)
-			tk.Entry(self.floor_frame,textvariable=self.add_vars['floor'],width=15).grid(row=1,column=2)
-
-			tk.Label(self.additional_info_frame,text='Description',pady=6,bd=2,relief='raised',width=84).grid(row=2,column=1,columnspan=3)
-			tk.Entry(self.additional_info_frame,textvariable=self.add_vars['description'],width=83).grid(row=3,column=1,columnspan=3)
-
-
-	def quit(self):
-		self.properties.stop_database()
-		self.master.quit()
 
 if __name__=='__main__':
-	gui = Gui()
-	gui.mainloop()
+	p = Gui()
+	p.mainloop()
