@@ -6,12 +6,38 @@ class Gui(tk.Frame):
 
 	def __init__(self,parent=None,*args,**kwargs):
 		tk.Frame.__init__(self,parent,*args,**kwargs)
-		self.pack()
 		self.master.minsize(width=600,height=400)
 		self.master.maxsize(width=600,height=400)
+		self.pack()
+
+		self.main_display = tk.Frame(self)
+		
 
 		self.add_view = AddView(self)
 		self.properties = Properties()
+		self.main_view()
+
+	def main_view(self):
+		self.main_display_buttons = tk.Frame(self.main_display)
+		self.main_display_properties = tk.Frame(self.main_display)
+		self.main_display.pack()
+		self.main_display_buttons.pack()
+
+		tk.Button(self.main_display_buttons,text='Add Property',command = lambda : self.packer(self.main_display,self.add_view.ask_view)).grid(row=1,column=1)
+		tk.Button(self.main_display_buttons,text='View Houses').grid(row=2,column=1)
+		tk.Button(self.main_display_buttons,text='View Flats').grid(row=3,column=1)
+		tk.Button(self.main_display_buttons,text='Quit').grid(row=4,column=1)
+
+	def packer(self,to_unpack,to_pack):
+		for child in to_unpack.winfo_children():
+			child.destroy()
+		to_unpack.pack_forget()
+		to_pack()
+
+	def quit(self):
+		self.properties.stop_database()
+		self.master.quit()
+
 
 class AddView(tk.Frame):
 
