@@ -1,5 +1,6 @@
 import Tkinter as tk
 from house import Properties,Apartment,House
+import excep as ex
 
 
 class Gui(tk.Frame):
@@ -21,7 +22,8 @@ class Gui(tk.Frame):
 		self.main_display_buttons = tk.Frame(self.main_display)
 		self.main_display_properties = tk.Frame(self.main_display)
 		self.main_display.pack()
-		self.main_display_buttons.pack()
+		self.main_display_buttons.pack(anchor='w')
+		self.main_display_properties.pack(anchor='e')
 
 		tk.Button(self.main_display_buttons,text='Add Property',command = lambda : self.packer(self.main_display,self.add_view.ask_view)).grid(row=1,column=1)
 		tk.Button(self.main_display_buttons,text='View Houses').grid(row=2,column=1)
@@ -33,6 +35,10 @@ class Gui(tk.Frame):
 			child.destroy()
 		to_unpack.pack_forget()
 		to_pack()
+
+	def back(self,to_hide,to_show):
+		to_hide()
+		to_show()
 
 	def quit(self):
 		self.properties.stop_database()
@@ -69,6 +75,13 @@ class AddView(tk.Frame):
 		self.main_options = (('House','For sale'),('Owner','Owner phone'),('Address','Square meters'),('Price','Garage'),('Description',None),
 							('Yard','Attic'),('Basement','Furniture'),('Parno','TEC'))
 		self.flat_options = ('Rooms','Max floors','Floor')
+
+		self.save_house_values = ('owner','house','for_sale','owner_phone','address','basement',
+									'attic','yard','garage','price','square_meters','furniture',
+									'parno','tec','floors','description')
+		self.save_flat_values = ('owner','house','for_sale','owner_phone','address','basement',
+									'attic','yard','garage','price','square_meters','furniture',
+									'parno','tec','description','rooms','floor','max_floors')
 
 	def ask_view(self):
 		self.pack()
@@ -115,8 +128,34 @@ class AddView(tk.Frame):
 				tk.Label(self.additional_frame,text=var,width=20,bd=2,relief='raised',pady=3).grid(row=row,column=column)
 				tk.Entry(self.additional_frame,textvariable=self.vars[var.lower().replace(' ','_')]).grid(row=row,column=column + 1)
 				column += 2
-		tk.Button(self.additional_frame,text='Back',width=16).grid(row=row,column=3)
-		tk.Button(self.additional_frame,text='Save',width=width).grid(row=row,column=4)
+		tk.Button(self.additional_frame,text='Back',width=16,command = lambda : self.master.back(self.hide,self.master.main_view)).grid(row=row,column=3)
+		tk.Button(self.additional_frame,text='Save',width=width,command = self.save_property).grid(row=row,column=4)
+
+	def save_property(self):
+		to_return = {}
+		try:
+			self.check_fields()
+			if self.vars['house'].get() == 0:
+				for value in self.save_house_values:
+					to_return[value] = self.vars[value].get()
+				print to_return
+			else:
+				for value in self.save_flat_values:
+					to_return[value] = self.vars[value].get()
+				print  to_return
+		except ex.InvalidValue:
+			mb.showwarning('Invalid Values','Some of the values that you\'ve entered are not valid')
+
+	def check_fields(self):
+		if self.vars['address'].get() == '' or self.vars['owner'].get() == '' or self.vars['owner_phone'].get() == '' or \
+		self.vars['price'].get() == 0 or self.vars['square_meters'].get() == 0:
+			raise ex.InvalidValue(0)
+		if self.vars['house'].get() == 0:
+			if self.vars['rooms'].get() == 0 or self.vars['max_floors'].get() == 0:
+				raise ex.InvalidValue(0)
+		else:
+			if self.vars['floors'].get() == 0:
+				raise ex.InvalidValue(0)
 
 	def show_view(self,info_dict):
 		self.pack()

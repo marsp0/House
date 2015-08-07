@@ -321,6 +321,14 @@ class Properties(object):
 		elif str_key.startswith('4'):
 			self.sale_apartments.pop(idd)
 
+	def get_houses(self):
+		to_return = self.rent_houses.update(self.sale_houses)
+		return to_return
+
+	def get_apartments(self):
+		to_return = self.rent_apartments.update(self.sale_apartments)
+		return to_return
+
 	def get_all(self):
 		to_return = self.rent_houses
 		to_return.update(self.rent_apartments)
